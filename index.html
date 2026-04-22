@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Salary Management System</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f4f6f9;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    width: 22%;
+}
+
+button {
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Salary Management System</h2>
+
+    <input type="text" id="name" placeholder="Name">
+    <input type="number" id="basic" placeholder="Basic">
+    <input type="number" id="bonus" placeholder="Bonus">
+    <input type="number" id="deductions" placeholder="Deductions">
+    <button onclick="addEmployee()">Add</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Basic</th>
+                <th>Bonus</th>
+                <th>Deductions</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+
+<script>
+const API = "http://localhost:5000/employees";
+
+// Load employees
+async function loadEmployees() {
+    const res = await fetch(API);
+    const data = await res.json();
+
+    const table = document.getElementById("tableBody");
+    table.innerHTML = "";
+
+    data.forEach(emp => {
+        let row = `
+            <tr>
+                <td>${emp.name}</td>
+                <td>${emp.basic}</td>
+                <td>${emp.bonus}</td>
+                <td>${emp.deductions}</td>
+                <td>${emp.total}</td>
+                <td>
+                    <button onclick="deleteEmployee(${emp.id})">Delete</button>
+                </td>
+            </tr>
+        `;
+        table.innerHTML += row;
+    });
+}
+
+// Add employee
+async function addEmployee() {
+    const name = document.getElementById("name").value;
+    const basic = +document.getElementById("basic").value || 0;
+    const bonus = +document.getElementById("bonus").value || 0;
+    const deductions = +document.getElementById("deductions").value || 0;
+
+    await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, basic, bonus, deductions })
+    });
+
+    loadEmployees();
+}
+
+// Delete employee
+async function deleteEmployee(id) {
+    await fetch(`${API}/${id}`, { method: "DELETE" });
+    loadEmployees();
+}
+
+// Initial load
+loadEmployees();
+</script>
+
+</body>
+</html>
